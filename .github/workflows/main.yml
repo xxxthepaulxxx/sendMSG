@@ -1,4 +1,4 @@
-name: Send-MSG-line
+name: Send-MSG-from-line-LAZYPAUL
 
 on:
   schedule:
