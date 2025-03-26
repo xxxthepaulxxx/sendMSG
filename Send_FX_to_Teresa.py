@@ -6,9 +6,11 @@ import requests
 import time
 import json
 import os
-from linebot import LineBotApi
+from linebot import LineBotApi, LineBotSdkDeprecatedIn30
 from linebot.models import TextSendMessage
 from linebot.exceptions import LineBotApiError
+import warnings
+
 import yfinance as yf
 from datetime import datetime, timedelta
 
@@ -133,22 +135,22 @@ def stock_price_gen(symbol):
 
 
 if __name__ == "__main__":
+    warnings.filterwarnings("ignore", category=LineBotSdkDeprecatedIn30)
     token = "hIWcMyy4bQsWiW+euigdcKuKOmErY38hotg5DHC5j+eYoU3a/9U7nPcwfPD437EmLfDyB8SK3TOWqy4VBsdq8dA0xZeYvjpenF8ZR/katKoGlB7GMrsXo+lJ2CA3jrxfHeQbvBhaZDb29ZrghM2M1AdB04t89/1O/w1cDnyilFU="
     # 設定你的Channel Access Token
     channel_access_token = token
     # 創建Line Bot API物件
-    # line_bot_api = LineBotApi(channel_access_token)
+    line_bot_api = LineBotApi(channel_access_token)
     # 用戶ID，這是你想要發送訊息的用戶
     user_id = "U7ba3afa719a7755f1ae6d896d6073902" #Paul
-    user_id = "Udde268c97307d903ece6a97a93743ad5" #shao
+    # user_id = "Udde268c97307d903ece6a97a93743ad5" #shao
 
     message = composeMSG()
     # 要發送的訊息
     message = TextSendMessage(text=message)
 
     # 發送訊息
-    # line_bot_api.push_message(to = user_id, messages=message)
-
+    line_bot_api.push_message(user_id, messages=message)
     ###STOCK QUERY
-    msg = stock_price_gen("2330")
+    msg = stock_price_gen("2330.tw")
     print(f"STOCK: {msg}")
