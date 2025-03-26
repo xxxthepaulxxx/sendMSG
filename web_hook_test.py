@@ -18,7 +18,7 @@ def linebot():
     body = request.get_data(as_text=True)                    # 取得收到的訊息內容
     try:
         json_data = json.loads(body)                         # json 格式化訊息內容
-        token = "hIWcMyy4bQsWiW+euigdcKuKOmErY38hotg5DHC5j+eYoU3a/9U7nPcwfPD437EmLfDyB8SK3TOWqy4VBsdq8dA0xZeYvjpenF8ZR/katKoGlB7GMrsXo+lJ2CA3jrxfHeQbvBhaZDb29ZrghM2M1AdB04t89/1O/w1cDnyilFU="
+        token = "XXXX"
         access_token = token #'你的 LINE Channel access token'
         secret = '6769c66fda328ac4c41c42f20f295201'
         line_bot_api = LineBotApi(access_token)              # 確認 token 是否正確
