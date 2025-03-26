@@ -137,10 +137,10 @@ if __name__ == "__main__":
     # 設定你的Channel Access Token
     channel_access_token = token
     # 創建Line Bot API物件
-    # line_bot_api = LineBotApi(channel_access_token)
+    line_bot_api = LineBotApi(channel_access_token)
     # 用戶ID，這是你想要發送訊息的用戶
     user_id = "U7ba3afa719a7755f1ae6d896d6073902" #Paul
-    user_id = "Udde268c97307d903ece6a97a93743ad5" #shao
+    # user_id = "Udde268c97307d903ece6a97a93743ad5" #shao
 
     message = composeMSG()
     # 要發送的訊息
@@ -150,5 +150,5 @@ if __name__ == "__main__":
     # line_bot_api.push_message(to = user_id, messages=message)
 
     ###STOCK QUERY
-    msg = stock_price_gen("2330")
+    msg = stock_price_gen("2330.tw")
     print(f"STOCK: {msg}")
