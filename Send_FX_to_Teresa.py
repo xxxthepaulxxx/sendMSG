@@ -6,9 +6,11 @@ import requests
 import time
 import json
 import os
-from linebot import LineBotApi
+from linebot import LineBotApi, LineBotSdkDeprecatedIn30
 from linebot.models import TextSendMessage
 from linebot.exceptions import LineBotApiError
+import warnings
+
 import yfinance as yf
 from datetime import datetime, timedelta
 
@@ -133,6 +135,7 @@ def stock_price_gen(symbol):
 
 
 if __name__ == "__main__":
+    warnings.filterwarnings("ignore", category=LineBotSdkDeprecatedIn30)
     token = "hIWcMyy4bQsWiW+euigdcKuKOmErY38hotg5DHC5j+eYoU3a/9U7nPcwfPD437EmLfDyB8SK3TOWqy4VBsdq8dA0xZeYvjpenF8ZR/katKoGlB7GMrsXo+lJ2CA3jrxfHeQbvBhaZDb29ZrghM2M1AdB04t89/1O/w1cDnyilFU="
     # 設定你的Channel Access Token
     channel_access_token = token
@@ -147,8 +150,7 @@ if __name__ == "__main__":
     message = TextSendMessage(text=message)
 
     # 發送訊息
-    # line_bot_api.push_message(to = user_id, messages=message)
-
+    line_bot_api.push_message(user_id, messages=message)
     ###STOCK QUERY
     msg = stock_price_gen("2330.tw")
     print(f"STOCK: {msg}")
