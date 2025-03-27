@@ -95,10 +95,15 @@ def sendMSGtoClient(token, message, user_id):
     line_bot_api.push_message(to = user_id, messages=message)
 
 def composeMSG ():
+    # get imfomration fromCATHAY
+    r = requests.get('https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/currency-billboard')
+    cathay_usd = float(BeautifulSoup(r.text, "lxml").find_all('tr')[1].find_all('td')[2].find('div').text)
+
     usd_to_jpy = get_google_currency('USD', 'JPY')
     usd_to_ntd = get_google_currency('USD', 'TWD')
     ntd_to_jpy = get_google_currency('TWD', 'JPY')
     message =(
+    f'\n國泰美金兌台幣: {cathay_usd:.2f}\n\n'
     f'USD_to_JPY: {usd_to_jpy}\n'
     f'USD to_NTD: {usd_to_ntd}\n'
     f'NTD to JPY: {ntd_to_jpy}\n'
@@ -146,6 +151,7 @@ if __name__ == "__main__":
     # user_id = "Udde268c97307d903ece6a97a93743ad5" #shao
 
     message = composeMSG()
+    print(message)
     # 要發送的訊息
     message = TextSendMessage(text=message)
 
