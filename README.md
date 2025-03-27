@@ -1,4 +1,4 @@
-# 每天早上 8:30 自動傳送匯率報價給 Teresa 老闆
+# 每天早上 8:30 自動傳送匯率報價給 LINE
 
 ### 1. 複製這個專案到自己的帳號
 - 项目地址：[https://github.com/ryk001/Send-FX-to-Teresa](https://github.com/ryk001/Send-FX-to-Teresa.git)
