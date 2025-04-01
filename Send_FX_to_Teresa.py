@@ -103,7 +103,7 @@ def composeMSG ():
     usd_to_ntd = get_google_currency('USD', 'TWD')
     ntd_to_jpy = get_google_currency('TWD', 'JPY')
     message =(
-    f'\n國泰美金兌台幣: {cathay_usd:.2f}\n\n'
+    f'國泰美金兌台幣: {cathay_usd:.2f}\n\n'
     f'USD_to_JPY: {usd_to_jpy:.2f}\n'
     f'USD to_NTD: {usd_to_ntd:.2f}\n'
     f'NTD to JPY: {ntd_to_jpy:.2f}\n'
