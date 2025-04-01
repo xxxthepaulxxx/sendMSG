@@ -149,7 +149,8 @@ if __name__ == "__main__":
     # 用戶ID，這是你想要發送訊息的用戶
     user_id = "U7ba3afa719a7755f1ae6d896d6073902" #Paul
     # user_id = "Udde268c97307d903ece6a97a93743ad5" #shao
-    # user_id = "U3211fc2ae21ca041a0bb34ebc8d36ea8" 
+    user_id = "U3211fc2ae21ca041a0bb34ebc8d36ea8"
+
 
     message = composeMSG()
     print(message)
