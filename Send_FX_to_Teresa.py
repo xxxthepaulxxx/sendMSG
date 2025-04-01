@@ -42,7 +42,7 @@ def get_google_currency(source_currency, target_currency):
     # test = BeautifulSoup(response.text, 'lxml').get_text()
     # print(f'RESULT: {test}')
     # return BeautifulSoup(response.text, 'lxml').find("div", class_="BNeawe iBp4i AP7Wnd").get_text().split(' ')[0]
-    return BeautifulSoup(response.text, 'lxml').find("div", class_="YMlKec fxKbKc").get_text().split(' ')[0]
+    return float(BeautifulSoup(response.text, 'lxml').find("div", class_="YMlKec fxKbKc").get_text().split(' ')[0])
 
 
 # usd_to_jpy = get_google_currency('USD', 'JPY')
@@ -104,9 +104,9 @@ def composeMSG ():
     ntd_to_jpy = get_google_currency('TWD', 'JPY')
     message =(
     f'\n國泰美金兌台幣: {cathay_usd:.2f}\n\n'
-    f'USD_to_JPY: {usd_to_jpy}\n'
-    f'USD to_NTD: {usd_to_ntd}\n'
-    f'NTD to JPY: {ntd_to_jpy}\n'
+    f'USD_to_JPY: {usd_to_jpy:.2f}\n'
+    f'USD to_NTD: {usd_to_ntd:.2f}\n'
+    f'NTD to JPY: {ntd_to_jpy:.2f}\n'
     'source: Google finance')
     return message
 
@@ -151,13 +151,14 @@ if __name__ == "__main__":
     # user_id = "Udde268c97307d903ece6a97a93743ad5" #shao
     user_id = "U3211fc2ae21ca041a0bb34ebc8d36ea8"
 
+
     message = composeMSG()
     print(message)
     # 要發送的訊息
     message = TextSendMessage(text=message)
 
     # 發送訊息
-    line_bot_api.push_message(user_id, messages=message)
+    # line_bot_api.push_message(user_id, messages=message)
     ###STOCK QUERY
-    msg = stock_price_gen("2330.tw")
-    print(f"STOCK: {msg}")
+    # msg = stock_price_gen("2330.tw")
+    # print(f"STOCK: {msg}")
