@@ -107,7 +107,7 @@ def composeMSG ():
     f'USD_to_JPY: {usd_to_jpy}\n'
     f'USD to_NTD: {usd_to_ntd}\n'
     f'NTD to JPY: {ntd_to_jpy}\n'
-    'source: Google finanace')
+    'source: Google finance')
     return message
 
 def stock_price_gen(symbol):
