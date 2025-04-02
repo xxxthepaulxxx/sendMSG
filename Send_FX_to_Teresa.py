@@ -158,7 +158,7 @@ if __name__ == "__main__":
     message = TextSendMessage(text=message)
 
     # 發送訊息
-    # line_bot_api.push_message(user_id, messages=message)
+    line_bot_api.push_message(user_id, messages=message)
     ###STOCK QUERY
     # msg = stock_price_gen("2330.tw")
     # print(f"STOCK: {msg}")
