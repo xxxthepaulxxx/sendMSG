@@ -96,7 +96,7 @@ def sendMSGtoClient(token, message, user_id):
 
 def composeMSG ():
     # get imfomration fromCATHAY
-    r = requests.get('https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/currency-billboard')
+    r = requests.get('https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/currency-billboard',verify=False)
     cathay_usd = float(BeautifulSoup(r.text, "lxml").find_all('tr')[1].find_all('td')[2].find('div').text)
 
     usd_to_jpy = get_google_currency('USD', 'JPY')
