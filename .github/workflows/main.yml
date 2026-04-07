@@ -3,7 +3,7 @@ name: Send-MSG-from-line-LAZYPAUL
 on:
   schedule:
   # At 00:00 on Monday, Tuesday, Wednesday, Thursday, and Friday.
-    - cron: "40 23 * * 1,2,3,4,5"
+    - cron: "50 23 * * 0,1,2,3,4"
   workflow_dispatch:
 
 env:
