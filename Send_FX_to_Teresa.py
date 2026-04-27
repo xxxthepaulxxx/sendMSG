@@ -12,6 +12,7 @@ from linebot.exceptions import LineBotApiError
 import warnings
 
 import yfinance as yf
+from yfinance.exceptions import YFRateLimitError
 from datetime import datetime, timedelta
 
 def get_stock_data(symbol, days=30):
@@ -29,20 +30,76 @@ def get_stock_data(symbol, days=30):
 
 ####test update
 
-# google currency
+def _rate_from_yahoo(source_currency, target_currency):
+    sym = f"{source_currency}{target_currency}=X"
+    t = yf.Ticker(sym)
+    try:
+        hist = t.history(period="5d")
+        if hist is not None and not hist.empty:
+            return float(hist["Close"].iloc[-1])
+    except (YFRateLimitError, Exception):
+        pass
+    try:
+        info = t.info
+        price = info.get("regularMarketPrice") or info.get("previousClose")
+        if price is not None:
+            return float(price)
+    except (YFRateLimitError, Exception):
+        pass
+    return None
+
+
+# 公開 JSON 匯率（不依賴 Google 網頁、Yahoo、舊版 google-currency 的 HTTP）
+_CURRENCY_API_USD = "https://latest.currency-api.pages.dev/v1/currencies/usd.json"
+
+
+def _get_usd_fx_triplet():
+    """併兩幣兌 USD 的比率，回傳 (USD→JPY, USD→TWD, 1 TWD→JPY)。"""
+    try:
+        r = requests.get(_CURRENCY_API_USD, timeout=20)
+        r.raise_for_status()
+        usd = r.json().get("usd", {})
+        jpy = usd.get("jpy")
+        twd = usd.get("twd")
+        if jpy is None or twd is None:
+            return None
+        jpy, twd = float(jpy), float(twd)
+        if twd == 0:
+            return None
+        return jpy, twd, jpy / twd
+    except (
+        requests.RequestException,
+        KeyError,
+        ValueError,
+        TypeError,
+        ZeroDivisionError,
+        json.JSONDecodeError,
+    ):
+        return None
+
+
+# google currency (scrape -> Yahoo -> google-currency package)
 def get_google_currency(source_currency, target_currency):
-    url = f"https://www.google.com/search?q={source_currency}+{target_currency}"
     url = f"https://www.google.com/finance/quote/{source_currency}-{target_currency}"
-    # print(f'{url}')
-    User_Agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36'
-    Headers = {'User-Agent' : User_Agent}
-    response = requests.get(url, headers=Headers)
-    # print(f'status_code: {response.status_code}')
-    # print(f'TEST: {response.text}')
-    # test = BeautifulSoup(response.text, 'lxml').get_text()
-    # print(f'RESULT: {test}')
-    # return BeautifulSoup(response.text, 'lxml').find("div", class_="BNeawe iBp4i AP7Wnd").get_text().split(' ')[0]
-    return float(BeautifulSoup(response.text, 'lxml').find("div", class_="YMlKec fxKbKc").get_text().split(' ')[0])
+    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    headers = {"User-Agent": user_agent}
+    try:
+        response = requests.get(url, headers=headers, timeout=20)
+        el = BeautifulSoup(response.text, "lxml").find("div", class_="YMlKec fxKbKc")
+        if el is not None:
+            return float(el.get_text().split(" ")[0])
+    except (AttributeError, ValueError, TypeError, requests.RequestException):
+        pass
+    y = _rate_from_yahoo(source_currency, target_currency)
+    if y is not None:
+        return y
+    try:
+        out = json.loads(convert(source_currency, target_currency, 1))
+        if out.get("converted") and out.get("amount") not in (0, "0", None, ""):
+            return float(str(out["amount"]).replace(",", ""))
+    except (json.JSONDecodeError, ValueError, TypeError, requests.RequestException):
+        pass
+    raise RuntimeError(f"無法取得 {source_currency}/{target_currency} 匯率")
 
 
 # usd_to_jpy = get_google_currency('USD', 'JPY')
@@ -95,19 +152,34 @@ def sendMSGtoClient(token, message, user_id):
     line_bot_api.push_message(to = user_id, messages=message)
 
 def composeMSG ():
+    if os.environ.get("FX_OFFLINE_TEST"):
+        return (
+            "【本機測試 FX_OFFLINE_TEST=1，未連線抓取匯率】\n"
+            "國泰美金兌台幣: 0.00\n\n"
+            "USD to JPY: 0.00\n"
+            "USD to NTD: 0.00\n"
+            "NTD to JPY: 0.00\n"
+            "source: offline"
+        )
     # get imfomration fromCATHAY
     r = requests.get('https://www.cathaybk.com.tw/cathaybk/personal/product/deposit/currency-billboard',verify=False)
     cathay_usd = float(BeautifulSoup(r.text, "lxml").find_all('tr')[1].find_all('td')[2].find('div').text)
 
-    usd_to_jpy = get_google_currency('USD', 'JPY')
-    usd_to_ntd = get_google_currency('USD', 'TWD')
-    ntd_to_jpy = get_google_currency('TWD', 'JPY')
+    triplet = _get_usd_fx_triplet()
+    if triplet is not None:
+        usd_to_jpy, usd_to_ntd, ntd_to_jpy = triplet
+        src = "currency-api.pages.dev (open)"
+    else:
+        usd_to_jpy = get_google_currency("USD", "JPY")
+        usd_to_ntd = get_google_currency("USD", "TWD")
+        ntd_to_jpy = get_google_currency("TWD", "JPY")
+        src = "scrape + Yahoo + fallback"
     message =(
     f'國泰美金兌台幣: {cathay_usd:.2f}\n\n'
     f'USD to JPY: {usd_to_jpy:.2f}\n'
     f'USD to NTD: {usd_to_ntd:.2f}\n'
     f'NTD to JPY: {ntd_to_jpy:.2f}\n'
-    'source: Google finance')
+    f'source: {src}')
     return message
 
 def stock_price_gen(symbol):
@@ -149,16 +221,17 @@ if __name__ == "__main__":
     # 用戶ID，這是你想要發送訊息的用戶
     user_id = "U7ba3afa719a7755f1ae6d896d6073902" #Paul
     # user_id = "Udde268c97307d903ece6a97a93743ad5" #shao
-    user_id = "U3211fc2ae21ca041a0bb34ebc8d36ea8"
+    # user_id = "U3211fc2ae21ca041a0bb34ebc8d36ea8"
 
 
-    message = composeMSG()
-    print(message)
-    # 要發送的訊息
-    message = TextSendMessage(text=message)
-
-    # 發送訊息
-    line_bot_api.push_message(user_id, messages=message)
+    message_text = composeMSG()
+    print(message_text)
+    if os.environ.get("SKIP_LINE"):
+        print("SKIP_LINE=1，未推播 LINE。")
+    else:
+        line_bot_api.push_message(
+            user_id, messages=TextSendMessage(text=message_text)
+        )
     ###STOCK QUERY
     # msg = stock_price_gen("2330.tw")
     # print(f"STOCK: {msg}")
