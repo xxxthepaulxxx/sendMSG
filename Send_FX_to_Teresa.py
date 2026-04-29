@@ -178,8 +178,8 @@ def composeMSG ():
     f'國泰美金兌台幣: {cathay_usd:.2f}\n\n'
     f'USD to JPY: {usd_to_jpy:.2f}\n'
     f'USD to NTD: {usd_to_ntd:.2f}\n'
-    f'NTD to JPY: {ntd_to_jpy:.2f}\n'
-    # f'source: {src}')
+    f'NTD to JPY: {ntd_to_jpy:.2f}\n')
+    # f'source: {src}'
     return message
 
 def stock_price_gen(symbol):
